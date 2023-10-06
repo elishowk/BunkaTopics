@@ -1,4 +1,4 @@
-import useSWR, { SWRResponse } from 'swr'
+import useSWR, { Key, SWRResponse } from 'swr'
 import { SearchResponse, SearchCustomOptions } from '../types'
 
 export const defaultQueryOptions = {
@@ -53,12 +53,18 @@ export default function useSearch(query: string, lang: string = "en", customOpti
       window.localStorage.removeItem('searchOverride')
     }
   }
+  type useSWRArgs = [
+    u: RequestInfo | URL,
+    q?: string,
+    lg?: string,
+    o?: SearchCustomOptions,
+  ];
 
   return useSWR<SearchResponse>(
     process.env.NEXT_PUBLIC_API_ENDPOINT !== 'local'
-      ? [`${process.env.NEXT_PUBLIC_API_ENDPOINT}/segment`, query, lang, customOptions ?? {}]
+      ? [`${process.env.NEXT_PUBLIC_API_ENDPOINT}/segment`, query, lang, customOptions]
       : ['/localSearchResults.json'],
-    ([u, q, lg, o]) => {
+    ([u, q, lg, o]: useSWRArgs) => {
       return fetch(u, process.env.NEXT_PUBLIC_API_ENDPOINT !== 'local' ? {
         method: 'post',
         body: JSON.stringify({

@@ -15,7 +15,6 @@ format:
 poetry_export:
 	poetry export --without-hashes --format=requirements.txt > requirements.txt
 
-
 #############
 # Streamlit  #
 #############
@@ -70,3 +69,10 @@ docker_push:
 
 get_ssh_key:
 	cat ~/.ssh/id_ed25519.pub
+
+#############
+# web app  #
+#############
+startweb:
+	export NEXT_PUBLIC_API_ENDPOINT=local
+	cd web && npm i && npm run start
