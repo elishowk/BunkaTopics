@@ -20,9 +20,11 @@ export const defaultQueryOptions = {
   },
 }
 
+const IS_LOCAL_DATA = process.env.NEXT_PUBLIC_API_ENDPOINT === 'local';
+
 export default function useSearch(query: string, lang: string = "en", customOptions?: SearchCustomOptions): SWRResponse {
   const credentialsRes = useSWR(
-    process.env.NEXT_PUBLIC_API_ENDPOINT === 'local' ? null : `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/token`,
+    IS_LOCAL_DATA ? null : `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/token`,
     (url) => {
       return fetch(url, {
         method: 'POST',
@@ -61,11 +63,11 @@ export default function useSearch(query: string, lang: string = "en", customOpti
   ];
 
   return useSWR<SearchResponse>(
-    process.env.NEXT_PUBLIC_API_ENDPOINT !== 'local'
+    !IS_LOCAL_DATA
       ? [`${process.env.NEXT_PUBLIC_API_ENDPOINT}/segment`, query, lang, customOptions]
       : ['/localSearchResults.json'],
     ([u, q, lg, o]: useSWRArgs) => {
-      return fetch(u, process.env.NEXT_PUBLIC_API_ENDPOINT !== 'local' ? {
+      return fetch(u, !IS_LOCAL_DATA ? {
         method: 'post',
         body: JSON.stringify({
           text: q,
@@ -125,9 +127,9 @@ export default function useSearch(query: string, lang: string = "en", customOpti
           return data.json()})
     },
     {
-      // Pull from cache if exists.
-      revalidateIfStale: process.env.NEXT_PUBLIC_SUGGESTIONS_FALLBACK !== "true",
-      revalidateOnMount: process.env.NEXT_PUBLIC_SUGGESTIONS_FALLBACK !== "true",
+      // cache management
+      revalidateIfStale: true,
+      revalidateOnMount: true,
       revalidateOnFocus: false,
       revalidateOnReconnect: false
     }
