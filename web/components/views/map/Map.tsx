@@ -1,4 +1,11 @@
-import React, { useLayoutEffect, useRef, useState, forwardRef, useImperativeHandle, Fragment } from 'react'
+import React, {
+  useLayoutEffect,
+  useRef,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+  Fragment
+} from 'react'
 import * as D3 from 'd3'
 import useTranslation from 'next-translate/useTranslation'
 import styled from '@emotion/styled'
@@ -83,11 +90,11 @@ export const StyledMap = styled.div<{ theme: Theme }>(({ theme }) => {
       }
 
       &::after {
-        content: ' ';  
+        content: ' ';
         width: 0;
         height: 0;
         display: block;
-        border-left: 4px solid transparent; 
+        border-left: 4px solid transparent;
         border-right: 4px solid transparent; 
         border-top: 5px solid rgba(255,255,255,0.9); 
         position: relative;
@@ -100,35 +107,41 @@ export const StyledMap = styled.div<{ theme: Theme }>(({ theme }) => {
       position: relative;
     }
 
-    ${theme.palette.mode === 'dark' && css`
-      svg {
-        background-color: ${theme.palette.background.default};
-
-      }
-      svg circle.documentCircle {
-        fill: white;
-      }
-      svg circle.documentCircle:hover,
-      svg circle.documentCircle.selected,
-      svg circle.documentCircle.targetted {
-        fill: red;
-      }
-      svg .colorscale text {
-        fill: white;
-      }
-    `}
+    ${
+      theme.palette.mode === 'dark' &&
+      css`
+        svg {
+          background-color: ${theme.palette.background.default};
+        }
+        svg circle.documentCircle {
+          fill: white;
+        }
+        svg circle.documentCircle:hover,
+        svg circle.documentCircle.selected,
+        svg circle.documentCircle.targetted {
+          fill: red;
+        }
+        svg .colorscale text {
+          fill: white;
+        }
+      `
+    }
   `
 })
 
 const MapWithRef = forwardRef<ViewHandler, MapProps>(function Map(props, ref) {
-  const { t } = useTranslation("common")
+  const { t } = useTranslation('common')
   const theme = useTheme()
   const renderedRef = useRef<HTMLDivElement>(null)
   const [isHelpOpen, setHelpOpen] = useState(false)
   const openHelp = () => setHelpOpen(true)
   const closeHelp = () => setHelpOpen(false)
-  const [transform, setTransform] = useState<MapTransform>(props.transform ?? { k: 1 })
-  const [dimension, _setDimension] = useState<DimensionType | string>(props.dimension ?? DimensionType.NONE)
+  const [transform, setTransform] = useState<MapTransform>(
+    props.transform ?? { k: 1 }
+  )
+  const [dimension, _setDimension] = useState<DimensionType | string>(
+    props.dimension ?? DimensionType.NONE
+  )
   // Trigger redraw by updating this counter.
   const [redrawCounter, setRedrawCounter] = useState<number>(0)
   const redraw = () => setRedrawCounter(redrawCounter + 1)
@@ -136,53 +149,70 @@ const MapWithRef = forwardRef<ViewHandler, MapProps>(function Map(props, ref) {
   // const zoomStep = 0.25
 
   const setDimension: typeof _setDimension = (d) => {
-    AnalyticsCustomEvent.trackEvent('map', 'setDimension', (d as string))
-    props.sortDocumentsBy?.(d === DimensionType.NONE ? 'relevance' : d as string)
+    AnalyticsCustomEvent.trackEvent('map', 'setDimension', d as string)
+    props.sortDocumentsBy?.(
+      d === DimensionType.NONE ? 'relevance' : (d as string)
+    )
     _setDimension(d)
   }
 
-  useImperativeHandle(ref, () => {
-    return {
-      focusOnDocument: (document?: Document, topic?: Topic) => {
-        return renderedRef.current?.dispatchEvent(new CustomEvent("documentfocus", {
-          detail: { document, topic }
-        }))
-      },
-      getDocumentSelection: (document?: Document) => {
-        if (document?.id != null) {
-          return D3
-            .select('#bourdieuMap')
-            .select<SVGGElement>(`g.document#document-${document.id.replaceAll('/','-').replaceAll('.', '_')}`)
-            .datum(document)
-        }
-      },
-      dispatchDocumentTargetted (document) {
-        renderedRef.current?.dispatchEvent(new CustomEvent("documenttargetted", {
-          detail: { document }
-        }) as DocumentSelectedEvent)
-      },
-      dispatchDocumentSelected (document) {
-        renderedRef.current?.dispatchEvent(new CustomEvent("documentselected", {
-          detail: { document }
-        }) as DocumentSelectedEvent)
-      },
-      dispatchTopicSelected: (topic?: Topic) => {
-        renderedRef.current?.dispatchEvent(new CustomEvent("topicselected", {
-          detail: { topic }
-        }))
-      },
-      getSize() {
-        return {
-          width: renderedRef.current?.clientWidth ?? 0,
-          height: renderedRef.current?.clientHeight ?? 0
+  useImperativeHandle(
+    ref,
+    () => {
+      return {
+        focusOnDocument: (document?: Document, topic?: Topic) => {
+          return renderedRef.current?.dispatchEvent(
+            new CustomEvent('documentfocus', {
+              detail: { document, topic }
+            })
+          )
+        },
+        getDocumentSelection: (document?: Document) => {
+          if (document?.id != null) {
+            return D3.select('#bourdieuMap')
+              .select<SVGGElement>(
+                `g.document#document-${document.id
+                  .replaceAll('/', '-')
+                  .replaceAll('.', '_')}`
+              )
+              .datum(document)
+          }
+        },
+        dispatchDocumentTargetted(document) {
+          renderedRef.current?.dispatchEvent(
+            new CustomEvent('documenttargetted', {
+              detail: { document }
+            }) as DocumentSelectedEvent
+          )
+        },
+        dispatchDocumentSelected(document) {
+          renderedRef.current?.dispatchEvent(
+            new CustomEvent('documentselected', {
+              detail: { document }
+            }) as DocumentSelectedEvent
+          )
+        },
+        dispatchTopicSelected: (topic?: Topic) => {
+          renderedRef.current?.dispatchEvent(
+            new CustomEvent('topicselected', {
+              detail: { topic }
+            })
+          )
+        },
+        getSize() {
+          return {
+            width: renderedRef.current?.clientWidth ?? 0,
+            height: renderedRef.current?.clientHeight ?? 0
+          }
         }
       }
-    }
-  }, [])
+    },
+    []
+  )
 
   useLayoutEffect(() => {
     if (props.screenSize?.width != null && props.screenSize.width > 0) {
-      draw("map", {
+      draw('map', {
         ...props,
         screenSize: props.screenSize,
         dimension,
@@ -195,41 +225,45 @@ const MapWithRef = forwardRef<ViewHandler, MapProps>(function Map(props, ref) {
 
     return () => {
       // clear map
-      D3
-        .select('#map')
-        .selectChildren()
-        .remove()
+      D3.select('#map').selectChildren().remove()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dimension, redrawCounter, props.documentSelected, props.topicSelected, props])
 
   let exportHref: string | undefined = undefined
   const svg = renderedRef.current?.getElementsByTagName('svg')[0]
   // @todo : Remove process.env.NEXT_PUBLIC_BETA !== "true"
-  if (svg && process.env.NEXT_PUBLIC_BETA !== "true") {
-    var preface = '<?xml version="1.0" standalone="no"?>\r\n';
-    var svgBlob = new Blob([preface, svg.outerHTML], {type:"image/svg+xml;charset=utf-8"})
+  if (svg && process.env.NEXT_PUBLIC_BETA !== 'true') {
+    var preface = '<?xml version="1.0" standalone="no"?>\r\n'
+    var svgBlob = new Blob([preface, svg.outerHTML], {
+      type: 'image/svg+xml;charset=utf-8'
+    })
     exportHref = URL.createObjectURL(svgBlob)
   }
 
   return (
-    <Box position="relative" flexGrow={1} overflow="hidden" sx={{
-      backgroundColor: props.interpolation === "terrain" ? "white" : "inherit"
-    }}>
+    <Box
+      position='relative'
+      flexGrow={1}
+      overflow='hidden'
+      sx={{
+        backgroundColor: props.interpolation === 'terrain' ? 'white' : 'inherit'
+      }}
+    >
       <StyledMap
-        id="map"
+        id='map'
         theme={theme}
         ref={renderedRef}
-        style={props.interpolation === "terrain" ? {
-          backgroundColor: 'rgba(194,223,255,0.5)'
-        } : undefined}
+        style={
+          props.interpolation === 'terrain'
+            ? {
+                backgroundColor: 'rgba(194,223,255,0.5)'
+              }
+            : undefined
+        }
       />
 
-      <Box
-        position="absolute"
-        top="1em"
-        left="1em"
-        display="block"
-      >
+      <Box position='absolute' top='1em' left='1em' display='block'>
         <DimensionSwitcherCard
           dimension={dimension}
           dimensions={props.dimensions}
@@ -256,62 +290,56 @@ const MapWithRef = forwardRef<ViewHandler, MapProps>(function Map(props, ref) {
             {t('Share')}
           </Button>
         </Box>
+      padding: 0.2em
       ) */}
 
-      <Box
-        position="absolute"
-        top="1em"
-        right="1em"
-        display="block"
-      >
-        <Card variant="outlined" sx={{ border: 0 }}>
+      <Box position='absolute' top='1em' right='1em' display='block'>
+        <Card variant='outlined' sx={{ border: 0 }}>
           <Button
             onClick={openHelp}
-            color="inherit"
-            variant="outlined"
-            size="small"
+            color='inherit'
+            variant='outlined'
+            size='small'
           >
             {t`How does this map work?`}
           </Button>
           <Dialog
             open={isHelpOpen}
             onClose={closeHelp}
-            aria-labelledby="help-dialog-title"
-            aria-describedby="help-dialog-description"
+            aria-labelledby='help-dialog-title'
+            aria-describedby='help-dialog-description'
           >
-            <DialogTitle id="help-dialog-title">
+            <DialogTitle id='help-dialog-title'>
               {t`How this map works`}
             </DialogTitle>
             <DialogContent>
-              <DialogContentText id="help-dialog-description">
+              <DialogContentText id='help-dialog-description'>
                 <Fragment>
                   <p>{t`The algorithm locates tweets on the map. It groups them into semantic regions, which are represented by dotted areas and a label at the center. The labels indicate the most specific words shared by tweets in a region.`}</p>
                 </Fragment>
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button color="info" onClick={closeHelp}>{t`OK`}</Button>
+              <Button color='info' onClick={closeHelp}>{t`OK`}</Button>
             </DialogActions>
           </Dialog>
         </Card>
       </Box>
 
-      <Box
-        position="absolute"
-        right="1em"
-        bottom="1em"
-        display="block"
-      >
-        <Card variant="outlined">
+      <Box position='absolute' right='1em' bottom='1em' display='block'>
+        <Card variant='outlined'>
           <ButtonGroup
-            orientation="vertical"
-            aria-label="vertical outlined button group"
+            orientation='vertical'
+            aria-label='vertical outlined button group'
           >
-            <IconButton size="small" onClick={() => {
-              AnalyticsCustomEvent.trackEvent('map', 'zoom', 'reset', 1)
-              setTransform({ k: 1 })
-              redraw()
-            }}>
+            <IconButton
+              size='small'
+              onClick={() => {
+                AnalyticsCustomEvent.trackEvent('map', 'zoom', 'reset', 1)
+                setTransform({ k: 1 })
+                redraw()
+              }}
+            >
               <ZoomOutMapIcon />
             </IconButton>
           </ButtonGroup>

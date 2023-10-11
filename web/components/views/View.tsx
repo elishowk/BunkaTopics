@@ -1,14 +1,31 @@
-import { forwardRef, useState, useEffect, useMemo, useRef, useImperativeHandle, memo } from 'react'
+import React from 'react'
+import {
+  forwardRef,
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useImperativeHandle,
+  memo
+} from 'react'
 import { debounce } from '@mui/material'
 
-import { Document, ViewHandler, ScreenSize, ViewProps, Topic, Views } from '../../types'
+import {
+  Document,
+  ViewHandler,
+  ScreenSize,
+  ViewProps,
+  Topic,
+  Views
+} from '../../types'
 import Map from './map/Map'
-import TreeMap from './treeMap/TreeMap'
-import VoronoiTreeMap from './voronoiTreeMap/VoronoiTreeMap'
 import DebugView from './_genericView/GenericView'
 import BourdieuMap from './bourdieuMap/BourdieuMap'
 
-const View = forwardRef<ViewHandler, ViewProps>(function ViewRender(props, ref) {
+const View = forwardRef<ViewHandler, ViewProps>(function ViewRender(
+  props,
+  ref
+) {
   const renderedRef = useRef<ViewHandler>(null)
   const [screenSize, setScreenSize] = useState<ScreenSize>()
   const {
@@ -22,37 +39,37 @@ const View = forwardRef<ViewHandler, ViewProps>(function ViewRender(props, ref) 
     documentSelected,
     topicSelected,
     selectDocument,
-    selectTopic,
+    selectTopic
   } = props
 
   const sortDocumentsBy = (dimension: string, asc: boolean = false) => {
     panelResultsRef?.current?.sortDocumentsBy(dimension, asc)
   }
 
-  useImperativeHandle(ref, () => ({
-    focusOnDocument: (document?: Document, topic?: Topic) => {
-      return renderedRef.current?.focusOnDocument?.(document, topic)
-    },
-    getDocumentSelection: (document?: Document) => {
-      return renderedRef.current?.getDocumentSelection?.(document)
-    },
-    dispatchDocumentTargetted: (document) => {
-      return renderedRef.current?.dispatchDocumentTargetted?.(document)
-    },
-    dispatchDocumentSelected: (document?: Document, topic?: Topic) => {
-      return renderedRef.current?.dispatchDocumentSelected?.(document, topic)
-    },
-    dispatchTopicSelected: (topic?: Topic) => {
-      return renderedRef.current?.dispatchTopicSelected?.(topic)
-    },
-    getSize: () =>
-      renderedRef.current?.getSize() ?? { width: 0, height: 0 },
-  }), [])
-
-  const handleResize = useMemo(
-    () => debounce(setScreenSize, 40),
+  useImperativeHandle(
+    ref,
+    () => ({
+      focusOnDocument: (document?: Document, topic?: Topic) => {
+        return renderedRef.current?.focusOnDocument?.(document, topic)
+      },
+      getDocumentSelection: (document?: Document) => {
+        return renderedRef.current?.getDocumentSelection?.(document)
+      },
+      dispatchDocumentTargetted: (document) => {
+        return renderedRef.current?.dispatchDocumentTargetted?.(document)
+      },
+      dispatchDocumentSelected: (document?: Document, topic?: Topic) => {
+        return renderedRef.current?.dispatchDocumentSelected?.(document, topic)
+      },
+      dispatchTopicSelected: (topic?: Topic) => {
+        return renderedRef.current?.dispatchTopicSelected?.(topic)
+      },
+      getSize: () => renderedRef.current?.getSize() ?? { width: 0, height: 0 }
+    }),
     []
   )
+
+  const handleResize = useMemo(() => debounce(setScreenSize, 40), [])
 
   useEffect(() => {
     const onResize = () => {
@@ -71,11 +88,13 @@ const View = forwardRef<ViewHandler, ViewProps>(function ViewRender(props, ref) 
     return () => {
       window.removeEventListener('resize', onResize)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
     selectDocument?.()
     selectTopic?.()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view])
 
   const viewProps: ViewProps = {
@@ -95,37 +114,15 @@ const View = forwardRef<ViewHandler, ViewProps>(function ViewRender(props, ref) 
   }
 
   switch (view) {
-    case Views.TREEMAP:
-      return (
-        <TreeMap
-          {...viewProps}
-        />
-      )
     case Views.BOURDIEU_MAP:
-      return (
-        <BourdieuMap
-          interpolation="terrain"
-          {...viewProps}
-        />
-      )
-    case Views.VORONOI:
-      return (
-        <VoronoiTreeMap
-          {...viewProps}
-        />
-      )
+      return <BourdieuMap interpolation='terrain' {...viewProps} />
     case Views.DEBUG:
-      return (
-        <DebugView
-          {...viewProps}
-        />
-      )
+      return <DebugView {...viewProps} />
     case Views.MAP:
-    case Views.CONTOURS:
     default:
       return (
-        <Map 
-          interpolation={view === Views["MAP"] ? "terrain" : "blue"}
+        <Map
+          interpolation={view === Views['MAP'] ? 'terrain' : 'blue'}
           {...viewProps}
         />
       )

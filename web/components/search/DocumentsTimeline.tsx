@@ -1,3 +1,4 @@
+import React from 'react'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import moment from 'moment'
 import * as D3 from 'd3'
@@ -12,15 +13,15 @@ export type DocumentsTimelineProps = {
   metadata?: ResultsMetadata
 }
 
-export default function DocumentsTimeline({ documents, metadata }: DocumentsTimelineProps) {
+export default function DocumentsTimeline({
+  documents,
+  metadata
+}: DocumentsTimelineProps) {
   const { t } = useTranslation('common')
   const renderedRef = useRef<HTMLDivElement>()
   const [screenSize, setScreenSize] = useState<ScreenSize>()
 
-  const handleResize = useMemo(
-    () => debounce(setScreenSize, 40),
-    []
-  )
+  const handleResize = useMemo(() => debounce(setScreenSize, 40), [])
 
   useEffect(() => {
     const onResize = () => {
@@ -45,18 +46,19 @@ export default function DocumentsTimeline({ documents, metadata }: DocumentsTime
     return () => {
       window.removeEventListener('resize', onResize)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const docs = documents
-    .map(d => ({
+    .map((d) => ({
       id: d.id,
-      ts: d.created_at_timestamp_sec,
+      ts: d.created_at_timestamp_sec
     }))
-    .filter(d => (d.ts ?? 0) > 0)
+    .filter((d) => (d.ts ?? 0) > 0)
     .reduce((prev: TimelineInputs, curr, _ind, arr) => {
       let defaultInput: TimelineInput = {
         year: moment.unix(curr.ts ?? 0).format('YYYY'),
-        month: moment.unix(curr.ts ?? 0 ).format('MM'),
+        month: moment.unix(curr.ts ?? 0).format('MM'),
         count: 0
       }
       defaultInput.label = `${defaultInput.month}/${defaultInput.year}`
@@ -69,23 +71,31 @@ export default function DocumentsTimeline({ documents, metadata }: DocumentsTime
     }, {})
 
   if (metadata?.earlierDocument != null) {
-    let year = parseInt(moment.unix(metadata.earlierDocument.created_at_timestamp_sec ?? 0).format('YYYY'))
-    let month = parseInt(moment.unix(metadata.earlierDocument.created_at_timestamp_sec ?? 0).format('M')) - 1
+    let year = parseInt(
+      moment
+        .unix(metadata.earlierDocument.created_at_timestamp_sec ?? 0)
+        .format('YYYY')
+    )
+    let month =
+      parseInt(
+        moment
+          .unix(metadata.earlierDocument.created_at_timestamp_sec ?? 0)
+          .format('M')
+      ) - 1
     const endYear = parseInt(moment().format('YYYY'))
     const endMonth = parseInt(moment().format('M'))
     while (year <= endYear) {
-      const _month = moment().month(month).format("MM")
+      const _month = moment().month(month).format('MM')
       docs[`${year}-${_month}`] = docs[`${year}-${_month}`] ?? {
         year: `${year}`,
         month: _month,
         count: 0,
-        label: `${_month}/${year}`,
+        label: `${_month}/${year}`
       }
       if (year == endYear && month === endMonth) {
         docs[`${year}-${_month}`].label = t('Current month')
-        break;
-      } else if (month !== 11)
-        month++
+        break
+      } else if (month !== 11) month++
       else {
         month = 0
         year++
@@ -94,24 +104,21 @@ export default function DocumentsTimeline({ documents, metadata }: DocumentsTime
   }
 
   useLayoutEffect(() => {
-    draw("timeline", { inputs: docs })
+    draw('timeline', { inputs: docs })
 
     return () => {
       // clear render
-      D3
-        .select('#timeline')
-        .selectChildren()
-        .remove()
+      D3.select('#timeline').selectChildren().remove()
     }
   }, [docs])
-  
+
   return (
     <Box
-      maxHeight="200px"
-      width="100%"
-      height="150px"
-      id="timeline"
+      maxHeight='200px'
+      width='100%'
+      height='150px'
+      id='timeline'
       ref={renderedRef}
     />
-  ) 
+  )
 }

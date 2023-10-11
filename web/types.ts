@@ -46,9 +46,9 @@ export type Document = {
   id: string
   text: string
   text_cleaned?: string
-  source?: "twitter.com" | "reddit.com"
-  language: "en" | "fr"
-  languages: ("en" | "fr")[]
+  source?: 'twitter.com' | 'reddit.com'
+  language: 'en' | 'fr'
+  languages: ('en' | 'fr')[]
   created_at_timestamp_sec?: number
   author: DocumentAuthor
   terms: DocumentTerm[]
@@ -112,9 +112,9 @@ export type SearchQueryIntensityDimension = {
 
 export type SearchQueryContinuumDimension = {
   id: string
-  left_id: string,
-  left_words: string[],
-  right_id: string,
+  left_id: string
+  left_words: string[]
+  right_id: string
   right_words: string[]
 }
 
@@ -156,9 +156,9 @@ export type SearchCustomOptions = {
 }
 
 export enum DimensionType {
-  "NONE",
-  "DENSITY",
-  "FRESHNESS",
+  'NONE',
+  'DENSITY',
+  'FRESHNESS',
 }
 
 export type ScreenSize = {
@@ -178,10 +178,12 @@ export type TopicSelectedEvent = CustomEvent<{ topic?: Topic }>
 export type ViewHandler = {
   focusOnDocument?: (document?: Document, topic?: Topic) => void
   dispatchDocumentTargetted?: (document?: Document) => void
-  getDocumentSelection?: (document?: Document) => Selection<SVGGElement, Document, any, unknown> | undefined
+  getDocumentSelection?: (
+    document?: Document
+  ) => Selection<SVGGElement, Document, any, unknown> | undefined
   dispatchDocumentSelected?: (document?: Document, topic?: Topic) => void
   dispatchTopicSelected?: (topic?: Topic) => void
-  getSize: () => { width: number, height: number }
+  getSize: () => { width: number; height: number }
 }
 
 export type ViewDimension = {
@@ -206,12 +208,9 @@ export type ViewDimensions = {
 }
 
 export enum Views {
-  "MAP",
-  "CONTOURS",
-  "TREEMAP",
-  "BOURDIEU_MAP",
-  "VORONOI",
-  "DEBUG"
+  'MAP',
+  'BOURDIEU_MAP',
+  'DEBUG',
 }
 
 export type ViewProps = {

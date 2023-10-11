@@ -3,16 +3,35 @@ import { useRouter } from 'next/router'
 import useTranslation from 'next-translate/useTranslation'
 import type { SWRResponse } from 'swr'
 import { CustomEvent, PageViews, SiteSearch } from '@piwikpro/react-piwik-pro'
-import { Box, Container, FormControl, Grid, MenuItem, Select } from '@mui/material'
+import {
+  Box,
+  Container,
+  FormControl,
+  Grid,
+  MenuItem,
+  Select
+} from '@mui/material'
 
 import AppLayout from '../components/AppLayout'
 import ErrorScreen from '../components/screens/Error'
 import LoadingScreen from '../components/screens/Loading'
-import PanelResults, { PanelResultsHandler } from '../components/search/PanelResults'
-import { DimensionType, SearchCustomOptions, SearchResponse, Document, ViewDimensions, ViewHandler, Topic, Views } from '../types'
+import PanelResults, {
+  PanelResultsHandler
+} from '../components/search/PanelResults'
+import {
+  DimensionType,
+  SearchCustomOptions,
+  SearchResponse,
+  Document,
+  ViewDimensions,
+  ViewHandler,
+  Topic,
+  Views
+} from '../types'
 import useSearch from '../utils/useSearch'
 import View from '../components/views/View'
 import useSearchCustomOptions from '../utils/useSearchCustomOptions'
+import React from 'react'
 
 export type SearchPageSuccessProps = {
   query: string
@@ -21,38 +40,49 @@ export type SearchPageSuccessProps = {
   changeCustomOptions: (options: SearchCustomOptions) => void
 }
 
-export function SearchPageSuccess({ query, response, customOptions, changeCustomOptions }: SearchPageSuccessProps) {
+export function SearchPageSuccess({
+  query,
+  response,
+  customOptions,
+  changeCustomOptions
+}: SearchPageSuccessProps) {
   const { t } = useTranslation('common')
   const viewRef = useRef<ViewHandler>(null)
   const panelResultsRef = useRef<PanelResultsHandler>(null)
-  const [view, setView] = useState<Views>(Views["MAP"])
+  const [view, setView] = useState<Views>(Views['MAP'])
 
   const dimensions: ViewDimensions = {
     intensity: [
       { type: DimensionType.NONE, label: t`None` },
       ...(response.data?.dimensions ?? [])
-        .filter(rdd => rdd.kind === 'intensity')
-        .map(rdd => {
-          const dimQuery = response.data?.query?.intensity_dimensions?.find(qd => qd.id === rdd.id)
-          return ({
+        .filter((rdd) => rdd.kind === 'intensity')
+        .map((rdd) => {
+          const dimQuery = response.data?.query?.intensity_dimensions?.find(
+            (qd) => qd.id === rdd.id
+          )
+          return {
             type: rdd.id.toLowerCase(),
-            label: (rdd.id as string)[0].toUpperCase() + (rdd.id as string).slice(1),
+            label:
+              (rdd.id as string)[0].toUpperCase() + (rdd.id as string).slice(1),
             keywords: dimQuery?.words
-          })
+          }
         })
     ],
     continuum: (response.data?.dimensions ?? [])
-      .filter(rdd => rdd.kind === 'continuum')
-      .map(rdd => {
-        const dimQuery = response.data?.query?.continuum_dimensions?.find(qd => qd.id === rdd.id)
-        return ({
+      .filter((rdd) => rdd.kind === 'continuum')
+      .map((rdd) => {
+        const dimQuery = response.data?.query?.continuum_dimensions?.find(
+          (qd) => qd.id === rdd.id
+        )
+        return {
           type: rdd.id.toLowerCase(),
-          label: (rdd.id as string)[0].toUpperCase() + (rdd.id as string).slice(1),
+          label:
+            (rdd.id as string)[0].toUpperCase() + (rdd.id as string).slice(1),
           idLeft: dimQuery?.left_id,
           idRight: dimQuery?.right_id,
           keywordsLeft: dimQuery?.left_words,
-          keywordsRight: dimQuery?.right_words,
-        })
+          keywordsRight: dimQuery?.right_words
+        }
       })
   }
 
@@ -60,7 +90,9 @@ export function SearchPageSuccess({ query, response, customOptions, changeCustom
     viewRef.current?.dispatchDocumentTargetted?.(document)
   }
 
-  const [documentSelected, setDocumentSelected] = useState<Document | undefined>()
+  const [documentSelected, setDocumentSelected] = useState<
+    Document | undefined
+  >()
   const [topicSelected, setTopicSelected] = useState<Topic | undefined>()
   const selectTopic = (topic?: Topic) => {
     setTopicSelected(topic)
@@ -86,22 +118,22 @@ export function SearchPageSuccess({ query, response, customOptions, changeCustom
   // }, [documentSelected, topicSelected])
 
   const viewSelector = (
-    <Box marginY="0.5em">
+    <Box marginY='0.5em'>
       <FormControl fullWidth>
         <Select
           value={view}
-          variant="standard"
+          variant='standard'
           fullWidth
           onChange={(e) => {
             CustomEvent.trackEvent('view', 'change', e.target.value as string)
             setView(e.target.value as Views)
           }}
         >
-          <MenuItem value={Views["MAP"]}>{t('Map')}</MenuItem>
-          {/* <MenuItem value={Views["CONTOURS"]}>{t('Contours')}</MenuItem> */}
-          {process.env.NEXT_PUBLIC_BETA !== 'true' && <MenuItem value={Views["TREEMAP"]}>{t('Treemap')}</MenuItem>}
-          <MenuItem value={Views["BOURDIEU_MAP"]}>{t('Bourdieu Map')}</MenuItem>
-          {process.env.NEXT_PUBLIC_BETA !== 'true' && <MenuItem value={Views["DEBUG"]}>{t('Debug')}</MenuItem>}
+          <MenuItem value={Views['MAP']}>{t('Map')}</MenuItem>
+          <MenuItem value={Views['BOURDIEU_MAP']}>{t('Bourdieu Map')}</MenuItem>
+          {process.env.NEXT_PUBLIC_BETA !== 'true' && (
+            <MenuItem value={Views['DEBUG']}>{t('Debug')}</MenuItem>
+          )}
         </Select>
       </FormControl>
     </Box>
@@ -156,14 +188,14 @@ export default function SearchPage() {
   const { saveCustomOptions } = useSearchCustomOptions()
   const { t } = useTranslation('common')
   const [customOptions, setCustomOptions] = useState<SearchCustomOptions>()
-  const q = (query.q ?? process.env.NEXT_PUBLIC_DEFAULT_SEARCH_QUERY ?? 'bunka') as string
-  const lg = (query.lg ?? process.env.NEXT_PUBLIC_DEFAULT_SEARCH_LANG ?? 'en') as string
-  
-  let response: SWRResponse = useSearch(
-    q,
-    lg,
-    customOptions
-  )
+  const q = (query.q ??
+    process.env.NEXT_PUBLIC_DEFAULT_SEARCH_QUERY ??
+    'bunka') as string
+  const lg = (query.lg ??
+    process.env.NEXT_PUBLIC_DEFAULT_SEARCH_LANG ??
+    'en') as string
+
+  let response: SWRResponse = useSearch(q, lg, customOptions)
 
   useEffect(() => {
     PageViews.trackPageView('searchPage')
@@ -181,25 +213,28 @@ export default function SearchPage() {
     }
   }, [response?.error])
 
-  return response.error || response.data?.documents == null || (response.data?.documents && response.data?.documents.length == 0)
-    ? (
-      <AppLayout query={query?.q != null ? `${query.q}` : undefined}>
-        <Container sx={{ paddingY: "1em", height: "100%" }}>
-          {response.error
-            ? <ErrorScreen error={t(response.error.message)} />
-            : (!response.isLoading && !response.isValidating) && response.data?.message != null
-              ? <ErrorScreen error={t(response.data.message)} />
-              : <LoadingScreen />
-          }
-        </Container>
-      </AppLayout>
-    )
-    : (
-      <SearchPageSuccess
-        query={`${query.q}`}
-        response={response}
-        customOptions={customOptions ?? {}}
-        changeCustomOptions={setCustomOptions}
-      />
-    )
+  return response.error ||
+    response.data?.documents == null ||
+    (response.data?.documents && response.data?.documents.length == 0) ? (
+    <AppLayout query={query?.q != null ? `${query.q}` : undefined}>
+      <Container sx={{ paddingY: '1em', height: '100%' }}>
+        {response.error ? (
+          <ErrorScreen error={t(response.error.message)} />
+        ) : !response.isLoading &&
+          !response.isValidating &&
+          response.data?.message != null ? (
+          <ErrorScreen error={t(response.data.message)} />
+        ) : (
+          <LoadingScreen />
+        )}
+      </Container>
+    </AppLayout>
+  ) : (
+    <SearchPageSuccess
+      query={`${query.q}`}
+      response={response}
+      customOptions={customOptions ?? {}}
+      changeCustomOptions={setCustomOptions}
+    />
+  )
 }

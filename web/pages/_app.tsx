@@ -1,3 +1,4 @@
+import React from 'react'
 import '@fontsource/roboto/300.css'
 import '@fontsource/roboto/400.css'
 import '@fontsource/roboto/500.css'
@@ -20,7 +21,7 @@ import lightTheme from '../utils/lightTheme'
 export default function App({ Component, pageProps }: AppProps) {
   const { t } = useTranslation('common')
   const [darkMode, setDarkMode] = useState(false)
-  
+
   useEffect(() => {
     PiwikPro.initialize?.(
       process.env.NEXT_PUBLIC_PIWIK_CONTAINER_ID ?? '',
@@ -30,7 +31,11 @@ export default function App({ Component, pageProps }: AppProps) {
       parseInt(process.env.NEXT_PUBLIC_HOTJAR_ID ?? '0'),
       parseInt(process.env.NEXT_PUBLIC_HOTJAR_SNIPPET_VERSION ?? '0')
     )
-    if (typeof window !== "undefined" && window?.localStorage != null && window.localStorage.getItem('darkMode') === 'true')
+    if (
+      typeof window !== 'undefined' &&
+      window?.localStorage != null &&
+      window.localStorage.getItem('darkMode') === 'true'
+    )
       setDarkMode(true)
   }, [])
 
@@ -38,24 +43,34 @@ export default function App({ Component, pageProps }: AppProps) {
     <>
       <SWRConfig
         value={{
-          fetcher: ([resource, init]) => fetch(resource, init).then(res => res.json())
+          fetcher: ([resource, init]) =>
+            fetch(resource, init).then((res) => res.json())
         }}
       >
         <Head>
           <title>{t`Bunka - The Exploration Engine`}</title>
-          <meta name="description" content={t('Explore the Web Visually')} />
-          <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
-          <link rel="icon" href="/favicon.png" />
+          <meta name='description' content={t('Explore the Web Visually')} />
+          <meta
+            name='viewport'
+            content='width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no'
+          />
+          <link rel='icon' href='/favicon.png' />
         </Head>
         <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
           <CssBaseline>
             <SearchCustomOptionsProvider>
-              <Component {...pageProps} switchMode={() => {
-                const newMode = !darkMode
-                setDarkMode(newMode)
-                if (typeof window !== "undefined" && window?.localStorage != null)
-                  localStorage.setItem('darkMode', newMode.toString())
-              }} />
+              <Component
+                {...pageProps}
+                switchMode={() => {
+                  const newMode = !darkMode
+                  setDarkMode(newMode)
+                  if (
+                    typeof window !== 'undefined' &&
+                    window?.localStorage != null
+                  )
+                    localStorage.setItem('darkMode', newMode.toString())
+                }}
+              />
             </SearchCustomOptionsProvider>
           </CssBaseline>
         </ThemeProvider>
